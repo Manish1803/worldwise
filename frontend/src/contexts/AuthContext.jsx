@@ -21,6 +21,7 @@ function authReducer(state, action) {
       return { ...state, isLoading: true };
     case "register":
       toast.success(action.payload?.message || "Registration successful");
+      localStorage.setItem("token", action.payload.token);
       return {
         ...state,
         user: action.payload.user,
@@ -30,6 +31,7 @@ function authReducer(state, action) {
       };
     case "login":
       toast.success(action.payload?.message || "Login successful");
+      localStorage.setItem("token", action.payload.token);
       return {
         ...state,
         user: action.payload.user,
@@ -39,6 +41,7 @@ function authReducer(state, action) {
       };
     case "logout":
       toast.success("Logout successful");
+      localStorage.removeItem("token");
       return {
         ...state,
         user: null,
@@ -63,11 +66,13 @@ const AuthProvider = ({ children }) => {
     try {
       const response = await axios.post(`${BASE_URL}/register`, userData);
       dispatch({ type: "register", payload: response.data });
+      return true;
     } catch (error) {
       dispatch({
         type: "error",
         payload: error.response?.data?.message || "Something went wrong",
       });
+      return false;
     }
   };
 
@@ -76,11 +81,13 @@ const AuthProvider = ({ children }) => {
     try {
       const response = await axios.post(`${BASE_URL}/login`, credentials);
       dispatch({ type: "login", payload: response.data });
+      return true;
     } catch (error) {
       dispatch({
         type: "error",
         payload: error.response?.data?.message || "Login failed",
       });
+      return false;
     }
   };
 
@@ -97,11 +104,13 @@ const AuthProvider = ({ children }) => {
         }
       );
       dispatch({ type: "logout" });
+      return true;
     } catch (error) {
       dispatch({
         type: "error",
         payload: error.response?.data?.message || "Logout failed",
       });
+      return false;
     }
   };
 
