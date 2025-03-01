@@ -4,19 +4,16 @@ const BlacklistedToken = require("./../models/BlacklistedToken");
 
 exports.register = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { name, email, password } = req.body;
 
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
-        message:
-          existingUser.email === email
-            ? "This email is already registered."
-            : "This username is already taken.",
+        message: "This email is already registered.",
       });
     }
 
-    const user = await User.create({ username, email, password });
+    const user = await User.create({ name, email, password });
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
@@ -26,6 +23,7 @@ exports.register = async (req, res) => {
       message: "Registration successful!",
       token,
       user: {
+        name: user.name,
         username: user.username,
         email: user.email,
       },
@@ -59,6 +57,7 @@ exports.login = async (req, res) => {
       message: "Login successful!",
       token,
       user: {
+        name: user.name,
         username: user.username,
         email: user.email,
       },
@@ -66,6 +65,17 @@ exports.login = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ message: error.message || "Login failed" });
   }
+};
+
+exports.getUser = async (req, res) => {
+  res.json({
+    user: {
+      id: req.user._id,
+      name: req.user.name,
+      username: req.user.username,
+      email: req.user.email,
+    },
+  });
 };
 
 exports.logout = async (req, res) => {
