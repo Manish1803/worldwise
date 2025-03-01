@@ -12,9 +12,9 @@ const citySchema = new mongoose.Schema({
     trim: true,
   },
   emoji: String,
-  visitDate: {
+  date: {
     type: Date,
-    required: [true, "Visit date is required"],
+    required: [true, "Date is required"],
   },
   notes: String,
   position: {
