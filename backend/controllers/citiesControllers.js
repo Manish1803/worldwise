@@ -2,13 +2,13 @@ const City = require("./../models/City");
 
 exports.createCity = async (req, res) => {
   try {
-    const { cityName, country, emoji, visitDate, notes, position } = req.body;
+    const { cityName, country, emoji, date, notes, position } = req.body;
 
     const city = await City.create({
       cityName,
       country,
       emoji,
-      visitDate,
+      date,
       notes,
       position,
       userId: req.user._id,
