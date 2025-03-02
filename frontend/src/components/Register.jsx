@@ -1,12 +1,12 @@
 import { useState } from "react";
 import Button from "./Button";
-import styles from "./Form.module.css";
+import styles from "./AuthForm.module.css";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router";
 
 function Register() {
   const [formData, setFormData] = useState({
-    username: "",
+    name: "",
     email: "",
     password: "",
   });
@@ -24,9 +24,7 @@ function Register() {
   const validate = () => {
     const newErrors = {};
 
-    if (!formData.username) newErrors.username = "Username is required";
-    else if (/\s/.test(formData.username))
-      newErrors.username = "Username cannot contain spaces";
+    if (!formData.name) newErrors.name = "Name is required";
 
     if (!formData.email) newErrors.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(formData.email))
@@ -52,16 +50,17 @@ function Register() {
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
       <div className={styles.row}>
-        <label htmlFor="username">Username</label>
+        <label htmlFor="name">Name</label>
         <input
           type="text"
-          id="username"
-          name="username"
-          placeholder="Enter your username"
-          value={formData.username}
+          id="name"
+          name="name"
+          placeholder="Enter your name"
+          value={formData.name}
           onChange={handleChange}
+          disabled={isLoading}
         />
-        {errors.username && <p className={styles.error}>{errors.username}</p>}
+        {errors.name && <p className={styles.error}>{errors.name}</p>}
       </div>
 
       <div className={styles.row}>
@@ -73,6 +72,7 @@ function Register() {
           placeholder="Enter your email"
           value={formData.email}
           onChange={handleChange}
+          disabled={isLoading}
         />
         {errors.email && <p className={styles.error}>{errors.email}</p>}
       </div>
@@ -86,12 +86,15 @@ function Register() {
           placeholder="Enter your password"
           value={formData.password}
           onChange={handleChange}
+          disabled={isLoading}
         />
         {errors.password && <p className={styles.error}>{errors.password}</p>}
       </div>
 
       <div className={styles.submit}>
-        <Button type="primary">Register</Button>
+        <Button type="primary" disabled={isLoading}>
+          Register
+        </Button>
       </div>
     </form>
   );

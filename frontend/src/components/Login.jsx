@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Button from "./Button";
-import styles from "./Form.module.css";
+import styles from "./AuthForm.module.css";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router";
 
