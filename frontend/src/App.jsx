@@ -1,26 +1,55 @@
-import { BrowserRouter, Route, Routes } from "react-router";
-import { AuthProvider } from "./contexts/AuthContext";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router";
+import { lazy, Suspense } from "react";
 import { Toaster } from "react-hot-toast";
-import Homepage from "./pages/Homepage";
-import Product from "./pages/Product";
-import Offer from "./pages/Offer";
-import Auth from "./pages/Auth";
-import AppLayout from "./pages/AppLayout";
+
+import { AuthProvider } from "./contexts/AuthContext";
+import { CitiesProvider } from "./contexts/CitiesContext";
+import ProtectedRoute from "./pages/ProtectedRoute";
+
+const Homepage = lazy(() => import("./pages/Homepage"));
+const Product = lazy(() => import("./pages/Product"));
+const Offer = lazy(() => import("./pages/Offer"));
+const Auth = lazy(() => import("./pages/Auth"));
+const AppLayout = lazy(() => import("./pages/AppLayout"));
+const PageNotFound = lazy(() => import("./pages/PageNotFound"));
+
+import CityList from "./components/CityList";
+import CountryList from "./components/CountryList";
+import City from "./components/City";
+import Form from "./components/Form";
+import SpinnerFullPage from "./components/SpinnerFullPage";
 
 function App() {
   return (
     <>
       <BrowserRouter>
         <AuthProvider>
-          <Toaster position="top-center" reverseOrder={false} />
-          <Routes>
-            <Route path="/" element={<Homepage />} />
-            <Route path="/product" element={<Product />} />
-            <Route path="/offers" element={<Offer />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/app" element={<AppLayout />}></Route>
-            <Route path="*" element={<h1>Page Not Found</h1>} />
-          </Routes>
+          <CitiesProvider>
+            <Suspense fallback={<SpinnerFullPage />}>
+              <Toaster position="top-center" reverseOrder={false} />
+              <Routes>
+                <Route path="/" element={<Homepage />} />
+                <Route path="/product" element={<Product />} />
+                <Route path="/offers" element={<Offer />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route
+                  path="/app"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<Navigate replace to="cities" />} />
+                  <Route path="cities" element={<CityList />} />
+                  <Route path="cities/:id" element={<City />} />
+                  <Route path="countries" element={<CountryList />} />
+                  <Route path="form" element={<Form />} />
+                </Route>
+                <Route path="*" element={<PageNotFound />} />
+              </Routes>
+            </Suspense>
+          </CitiesProvider>
         </AuthProvider>
       </BrowserRouter>
     </>
