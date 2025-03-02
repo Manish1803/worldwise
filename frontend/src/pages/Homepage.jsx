@@ -17,7 +17,7 @@ function Homepage() {
           A world map that remembers every city you’ve visited. Relive your
           adventures and inspire others to explore.
         </h2>
-        <Link to="/login" className="cta">
+        <Link to="/auth" className="cta">
           Start tracking now
         </Link>
       </section>

@@ -1,8 +1,10 @@
 import { useState } from "react";
+
 import PageNav from "../components/PageNav";
-import styles from "./Auth.module.css";
 import Login from "../components/Login";
 import Register from "../components/Register";
+
+import styles from "./Auth.module.css";
 
 function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -19,7 +21,7 @@ function Auth() {
             onClick={() => setIsLogin((is) => !is)}
             className={styles.toggleBtn}
           >
-            {isLogin ? "Register" : "Log in"}
+            {isLogin ? "Register Now" : "Log in"}
           </button>
         </span>
       </section>
