@@ -1,16 +1,15 @@
-import { createContext, useContext, useReducer } from "react";
+import { createContext, useContext, useEffect, useReducer } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
 const AuthContext = createContext();
 
 const BASE_URL = `${import.meta.env.VITE_BACKEND_URL}/auth`;
-console.log(BASE_URL);
 
 const initialState = {
   user: null,
-  token: localStorage.getItem("token") || null,
-  isAuthenticated: !!localStorage.getItem("token"),
+  token: null,
+  isAuthenticated: false,
   isLoading: false,
   error: null,
 };
@@ -20,8 +19,7 @@ function authReducer(state, action) {
     case "loading":
       return { ...state, isLoading: true };
     case "register":
-      toast.success(action.payload?.message || "Registration successful");
-      localStorage.setItem("token", action.payload.token);
+      toast.success("Registration successful");
       return {
         ...state,
         user: action.payload.user,
@@ -30,8 +28,7 @@ function authReducer(state, action) {
         isLoading: false,
       };
     case "login":
-      toast.success(action.payload?.message || "Login successful");
-      localStorage.setItem("token", action.payload.token);
+      toast.success("Login successful");
       return {
         ...state,
         user: action.payload.user,
@@ -41,7 +38,6 @@ function authReducer(state, action) {
       };
     case "logout":
       toast.success("Logout successful");
-      localStorage.removeItem("token");
       return {
         ...state,
         user: null,
@@ -52,6 +48,14 @@ function authReducer(state, action) {
     case "error":
       toast.error(action.payload || "Something went wrong");
       return { ...state, error: action.payload, isLoading: false };
+    case "loadToken":
+      return {
+        ...state,
+        token: action.payload,
+        isAuthenticated: !!action.payload,
+      };
+    case "userData":
+      return { ...state, user: action.payload, isAuthenticated: true };
     default:
       throw new Error("Unknown action");
   }
@@ -61,10 +65,33 @@ const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
   const { user, token, isAuthenticated, isLoading, error } = state;
 
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    if (storedToken) {
+      dispatch({ type: "loadToken", payload: storedToken });
+    }
+  }, []);
+
+  const fetchUser = async () => {
+    if (!token) return;
+    dispatch({ type: "loading" });
+    try {
+      const response = await axios.get(`${BASE_URL}/account`);
+      console.log(response);
+      dispatch({ type: "userData", payload: response.data });
+    } catch (error) {
+      dispatch({
+        type: "error",
+        payload: error.response?.data?.message || "Something went wrong",
+      });
+    }
+  };
+
   const register = async (userData) => {
     dispatch({ type: "loading" });
     try {
       const response = await axios.post(`${BASE_URL}/register`, userData);
+      localStorage.setItem("token", response.data.token);
       dispatch({ type: "register", payload: response.data });
       return true;
     } catch (error) {
@@ -80,6 +107,7 @@ const AuthProvider = ({ children }) => {
     dispatch({ type: "loading" });
     try {
       const response = await axios.post(`${BASE_URL}/login`, credentials);
+      localStorage.setItem("token", response.data.token);
       dispatch({ type: "login", payload: response.data });
       return true;
     } catch (error) {
@@ -103,6 +131,7 @@ const AuthProvider = ({ children }) => {
           },
         }
       );
+      localStorage.removeItem("token");
       dispatch({ type: "logout" });
       return true;
     } catch (error) {
@@ -124,6 +153,7 @@ const AuthProvider = ({ children }) => {
         register,
         login,
         logout,
+        fetchUser,
       }}
     >
       {children}
